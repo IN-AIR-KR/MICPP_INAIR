@@ -13,7 +13,7 @@ matplotlib.use("Agg")
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from scopp import allocate_conflict_cells, cluster_map, discretize_map, load_map, plan_coverage_paths
+from scopp import ClusteringProfile, ScoppConfig, allocate_conflict_cells, cluster_map, discretize_map, load_map, plan_coverage_paths
 from scopp.map.visualization import render_plan
 
 
@@ -21,11 +21,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("map_file", type=Path)
     parser.add_argument("--output", type=Path, default=Path("plan.png"))
-    parser.add_argument("--profile", choices=["deterministic_lloyd", "official_minibatch"], default="deterministic_lloyd")
+    parser.add_argument("--profile", choices=[item.value for item in ClusteringProfile], default=ClusteringProfile.DETERMINISTIC_LLOYD.value)
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
     mapped = discretize_map(load_map(args.map_file))
-    clustered = cluster_map(mapped, profile=args.profile, random_seed=args.seed)
+    config = ScoppConfig.from_cli(args.profile, args.seed)
+    clustered = cluster_map(mapped, profile=config.clustering_profile, random_seed=config.random_seed, tolerance_m=config.clustering_tolerance_m, max_iterations=config.clustering_max_iterations)
     allocation = allocate_conflict_cells(mapped, clustered)
     plan = plan_coverage_paths(mapped, allocation)
     figure, _ = render_plan(mapped, allocation, plan)

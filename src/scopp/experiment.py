@@ -13,6 +13,7 @@ from scopp.algorithm.path_planning import plan_coverage_paths
 from scopp.map.grid import discretize_map
 from scopp.map.io import load_map
 from scopp.map.models import MapDefinition
+from scopp.config import ClusteringProfile, ScoppConfig
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,8 +74,10 @@ def run_definition(
     auction_bias: float = 0.5,
     clustering_profile: str = "deterministic_lloyd",
     random_seed: int = 0,
+    config: ScoppConfig | None = None,
 ) -> ExperimentReport:
     """Execute the complete pipeline for an already validated map."""
+    settings = config or ScoppConfig(ClusteringProfile(clustering_profile), random_seed, auction_bias)
     total_start = perf_counter()
 
     start = perf_counter()
@@ -82,11 +85,11 @@ def run_definition(
     discretization_s = perf_counter() - start
 
     start = perf_counter()
-    clustered = cluster_map(mapped, profile=clustering_profile, random_seed=random_seed)
+    clustered = cluster_map(mapped, profile=settings.clustering_profile, random_seed=settings.random_seed, tolerance_m=settings.clustering_tolerance_m, max_iterations=settings.clustering_max_iterations)
     clustering_s = perf_counter() - start
 
     start = perf_counter()
-    allocated = allocate_conflict_cells(mapped, clustered, bias=auction_bias)
+    allocated = allocate_conflict_cells(mapped, clustered, bias=settings.auction_bias)
     auction_s = perf_counter() - start
 
     start = perf_counter()
@@ -113,7 +116,7 @@ def run_definition(
         clustering_converged=clustered.converged,
         clustering_profile=clustered.profile,
         random_seed=clustered.random_seed,
-        auction_bias=auction_bias,
+        auction_bias=settings.auction_bias,
         node_metrics=node_metrics,
         cell_count_range=int(max(counts) - min(counts)) if counts else 0,
         cell_count_cv=_coefficient_of_variation(counts),
@@ -131,7 +134,8 @@ def run_experiment(
     auction_bias: float = 0.5,
     clustering_profile: str = "deterministic_lloyd",
     random_seed: int = 0,
+    config: ScoppConfig | None = None,
 ) -> ExperimentReport:
     """Load a map, execute the complete SCoPP pipeline, and collect metrics."""
     source_path = Path(map_path)
-    return run_definition(load_map(source_path), map_path=source_path.as_posix(), auction_bias=auction_bias, clustering_profile=clustering_profile, random_seed=random_seed)
+    return run_definition(load_map(source_path), map_path=source_path.as_posix(), auction_bias=auction_bias, clustering_profile=clustering_profile, random_seed=random_seed, config=config)

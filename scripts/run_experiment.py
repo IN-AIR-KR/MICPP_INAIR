@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from scopp.config import ClusteringProfile, ScoppConfig
 from scopp.experiment import run_experiment
 
 
@@ -18,10 +19,10 @@ def main() -> None:
     parser.add_argument("map_file", type=Path)
     parser.add_argument("--output", type=Path, default=Path("experiment.json"))
     parser.add_argument("--bias", type=float, default=0.5)
-    parser.add_argument("--profile", choices=["deterministic_lloyd", "official_minibatch"], default="deterministic_lloyd")
+    parser.add_argument("--profile", choices=[item.value for item in ClusteringProfile], default=ClusteringProfile.DETERMINISTIC_LLOYD.value)
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
-    report = run_experiment(args.map_file, auction_bias=args.bias, clustering_profile=args.profile, random_seed=args.seed)
+    report = run_experiment(args.map_file, config=ScoppConfig.from_cli(args.profile, args.seed, args.bias))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report.to_dict(), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"wrote {args.output}")
