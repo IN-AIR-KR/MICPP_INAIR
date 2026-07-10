@@ -1,4 +1,5 @@
 # SCoPP 논문 실내 재현 및 Multi-robot Indoor Coverage Path Planning 구현 
+(https://github.com/onelkhjh/Multi-robot_Indoor_Coverage_Path-Planning)에 업데이트 
 
 ## Clustering baseline
 
@@ -64,9 +65,6 @@ python scripts/compare_path_planners.py examples/maps/indoor_lab.yaml --seed 0 -
 
 요약 문서는 `artifacts/executable_kpi_result.md` 에 있다.
 
-## 서브 에이전트
-
-서브 에이전트 역할과 사용 규칙은 [docs/subagents.md](docs/subagents.md) 에 정리되어 있다.
 
 ## 참고
 
@@ -74,55 +72,3 @@ python scripts/compare_path_planners.py examples/maps/indoor_lab.yaml --seed 0 -
 - 최종 KPI 보고는 direct-distance 숫자를 사용하지 않는다.
 
 ---
-
-## English
-
-This repository uses the SCoPP paper *Scalable Coverage Path Planning of Multi-Robot Teams for Monitoring Non-Convex Areas* (arXiv:2103.14709) and the official author code as the baseline reference, while targeting better KPI under the same conditions and optimizing for indoor flight.
-
-The baseline scope stays focused on clustering, auction, and coverage path planning. Those stages remain the reference behavior for reproduction, but the main project emphasis is on routes and metrics that are more suitable for indoor flight.
-
-The project is framed as Multi-robot Indoor Coverage Path Planning. Direct-distance and executable-distance are never mixed; comparisons are always made under the same map, the same allocation, and the same constraints.
-
-## Core direction
-
-- baseline reference: SCoPP paper + official code
-- comparison focus: KPI under the same state
-- optimization focus: paths and metrics better suited for multi-robot indoor flight
-- reporting discipline: do not mix direct-distance and executable-distance
-- reference retention: clustering, auction, and coverage path planning stay as baseline behavior
-
-## Current checked-in artifacts
-
-- `artifacts/path_planner_exec_only_v1.json`
-- `artifacts/path_planner_exec_only_v1.png`
-- `artifacts/executable_kpi_result.md`
-- `artifacts/indoor_lab.png`
-- `artifacts/indoor_lab_plan.png`
-- `artifacts/indoor_lab_metrics.json`
-- `artifacts/paper_like.png`
-
-## Run
-
-```powershell
-python -m pip install -e ".[test]"
-python -m pytest
-python scripts/build_path_ui.py examples/maps/indoor_lab.yaml --output artifacts/path_ui.html
-python scripts/build_progress_ui.py --output artifacts/progress_ui.html
-python scripts/build_path_comparison_ui.py examples/maps/indoor_lab.yaml --output artifacts/path_comparison_ui.html --seed 0 --bias 0.5
-python scripts/compare_path_planners.py examples/maps/indoor_lab.yaml --seed 0 --bias 0.5 --output artifacts/path_planner_exec_only_v1.json --plot artifacts/path_planner_exec_only_v1.png
-```
-
-## Exec-only comparison result
-
-The main comparison artifact is `artifacts/path_planner_exec_only_v1.png`. It compares Metric-TSP and public-code NN under the same `grid-adjacent executable` model with no-fly blocking.
-
-The summary report is `artifacts/executable_kpi_result.md`.
-
-## Sub-agents
-
-The sub-agent roles and usage rules are documented in [docs/subagents.md](docs/subagents.md).
-
-## Notes
-
-- `path_ui.html`, `progress_ui.html`, and `path_comparison_ui.html` are Python-generated UI templates.
-- Final KPI reporting does not use direct-distance numbers.
