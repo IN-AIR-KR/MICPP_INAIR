@@ -1,4 +1,4 @@
-# Multi-robot Indoor Coverage Path Planning
+# SCoPP 논문 실내 재현 및 Multi-robot Indoor Coverage Path Planning 구현 
 
 ## Clustering baseline
 
